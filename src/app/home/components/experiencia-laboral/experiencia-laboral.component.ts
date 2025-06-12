@@ -35,7 +35,7 @@ export class ExperienciaLaboralComponent implements OnInit {
     if (this.form.invalid) return;
     await this.db.agregarExperiencia(this.form.getRawValue());
     this.form.reset({ actual: true, inicio: 0, termino: 0 });
-    this.lista = await this.db.listaExperiencia();   // refresca la lista en pantalla
+    this.lista = await this.db.listaExperiencia();
   }
 
 }

@@ -14,29 +14,38 @@ export class DbTaskService {
   constructor(private storage: Storage) { }
 
   async init() {
-    if (this.connection) return;
+    if (this.connection) {
+      // Si ya tenemos una conexión abierta, no hacemos nada
+      // Esto es útil para evitar reabrir la conexión en cada uso
+      // y para evitar errores si intentamos abrirla de nuevo.
+      const opened = (typeof this.connection.isDBOpen === 'function')
+                       ? this.connection.isDBOpen()
+                       : this.connection.isDBOpen;
+  
+      if (!opened) {
+        await this.connection.open();
+      }
+      return;
+    }
 
     const sqlite = new SQLiteConnection(CapacitorSQLite);
 
     if (Capacitor.isNativePlatform()) {
       this.connection = await sqlite.createConnection(
-        'skeleton.db', false, 'no-encryption', 1, false
+        'skeleton.db', false, 'no-encryption', 2, false
       );
       await this.connection.open();
       await this.createTables();
-    }
-
-    else if (customElements.get('jeep-sqlite')) {
+    } else if (customElements.get('jeep-sqlite')) {
       this.connection = await sqlite.createConnection(
-        'skeleton',
-        false, 'no-encryption', 1, false
+        'skeleton', false, 'no-encryption', 1, false
       );
       await this.connection.open();
-    
+
       await this.createTables();
     }
 
-    /* ───────────── fallback: Storage solo ───────────── */
+    // En web, usamos Ionic Storage para persistencia
     await this.storage.create();
   }
 
@@ -50,7 +59,7 @@ export class DbTaskService {
       );
 
       CREATE TABLE IF NOT EXISTS datos_personales (
-        id INTEGER PRIMARY KEY CHECK (id=1),     -- solo un registro
+        user_name TEXT(8) PRIMARY KEY REFERENCES sesion_data(user_name) ON DELETE CASCADE,
         nombre TEXT NOT NULL,
         apellido  TEXT NOT NULL,
         educacion TEXT NOT NULL,
@@ -58,7 +67,8 @@ export class DbTaskService {
       );
 
       CREATE TABLE IF NOT EXISTS experiencia (
-        id INTEGER  PRIMARY KEY AUTOINCREMENT,
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        user_name TEXT(8) NOT NULL REFERENCES sesion_data(user_name) ON DELETE CASCADE,
         empresa TEXT NOT NULL,
         inicio INTEGER NOT NULL,
         actual INTEGER NOT NULL,
@@ -68,6 +78,7 @@ export class DbTaskService {
 
       CREATE TABLE IF NOT EXISTS certificados (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
+        user_name TEXT(8) NOT NULL REFERENCES sesion_data(user_name) ON DELETE CASCADE,
         nombre TEXT NOT NULL,
         fecha TEXT NOT NULL,
         vence INTEGER NOT NULL,
@@ -142,35 +153,39 @@ export class DbTaskService {
     }
   }
 
+  async usuarioActual(): Promise<string | null> {
+    const ses = await this.storage.get('session');
+    return ses?.user ?? null;
+  }
+
   async guardarMisDatos(datos: {
     nombre: string;
     apellido: string;
     educacion: string;
     fnac: string;
   }) {
-    /* 1️⃣ SQLite nativo / jeep-sqlite */
+    const user = await this.usuarioActual();
+    if (!user) return;
+
     if (this.connection) {
       await this.connection.run(
-        `INSERT OR REPLACE INTO datos_personales
-         (id,nombre,apellido,educacion,fnac)
-         VALUES (1,?,?,?,?)`,
-        [datos.nombre, datos.apellido, datos.educacion, datos.fnac]
+        `INSERT OR REPLACE INTO datos_personales (user_name,nombre,apellido,educacion,fnac) VALUES (?,?,?,?,?)`,
+        [user, datos.nombre, datos.apellido, datos.educacion, datos.fnac]
       );
     }
-  
-    /* 2️⃣ Fallback Storage (ionic serve) */
-    await this.storage.set('datos_personales', datos);
+    await this.storage.set(`datos_personales_${user}`, datos);
   }
-  
+
   async obtenerMisDatos() {
+    const user = await this.usuarioActual();
+    if (!user) return null;
+
     if (this.connection) {
       const r = await this.connection.query(
-        `SELECT nombre,apellido,educacion,fnac
-         FROM datos_personales WHERE id = 1`
-      );
+        `SELECT nombre,apellido,educacion,fnac FROM datos_personales WHERE user_name = ?`, [user]);
       if (r.values?.length) return r.values[0];
     }
-    return (await this.storage.get('datos_personales')) ?? null;
+    return await this.storage.get(`datos_personales_${user}`);
   }
 
   /**
@@ -198,21 +213,18 @@ export class DbTaskService {
     termino: number | null;
     cargo: string;
   }) {
-    const { empresa, inicio, actual, termino, cargo } = exp;
+    const user = await this.usuarioActual();
+    if (!user) return;
 
-    /* 1️⃣  Plataforma nativa (o jeep-sqlite en web)  */
     if (this.connection) {
       await this.connection.run(
-        `INSERT INTO experiencia (empresa,inicio,actual,termino,cargo)
-         VALUES (?,?,?,?,?)`,
-        [empresa, inicio, +actual, termino, cargo]
+        `INSERT INTO experiencia (user_name,empresa,inicio,actual,termino,cargo) VALUES (?,?,?,?,?,?)`,
+        [user, exp.empresa, exp.inicio, +exp.actual, exp.termino, exp.cargo]
       );
     }
-
-    /* 2️⃣  Fallback para ionic serve → guardamos en Ionic Storage */
-    const lista = (await this.storage.get('experiencia')) ?? [];
-    lista.unshift({ empresa, inicio, actual, termino, cargo });
-    await this.storage.set('experiencia', lista);
+    const lst = (await this.storage.get(`exp_${user}`)) ?? [];
+    lst.unshift({ ...exp });
+    await this.storage.set(`exp_${user}`, lst);
   }
 
   async eliminarExperiencia(id: number) {
@@ -272,14 +284,15 @@ export class DbTaskService {
    * @returns 
    */
   async listaExperiencia() {
-    // Si hay conexión nativa (Android/iOS o jeep-sqlite en web)  ➜ usa SQLite
+    const user = await this.usuarioActual();
+    if (!user) return [];
+
     if (this.connection) {
-      const r = await this.connection.query(`SELECT * FROM experiencia ORDER BY id DESC`);
+      const r = await this.connection.query(
+        `SELECT * FROM experiencia WHERE user_name = ? ORDER BY id DESC`, [user]);
       return r.values ?? [];
     }
-
-    // Browser sin SQLite ➜ usa Storage (o devuelve array vacío)
-    return (await this.storage.get('experiencia')) ?? [];
+    return (await this.storage.get(`exp_${user}`)) ?? [];
   }
 
   /* CURD de los certificados */
