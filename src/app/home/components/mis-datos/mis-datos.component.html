@@ -1,0 +1,47 @@
+<ion-card class="datos-card" [formGroup]="form">
+  <h3>Información adicional</h3>
+
+  <!-- Nombre -->
+  <ion-item lines="inset">
+    <ion-label position="floating">Nombre</ion-label>
+    <ion-input #nombreInput formControlName="nombre"></ion-input>
+  </ion-item>
+
+  <!-- Apellido -->
+  <ion-item lines="inset">
+    <ion-label position="floating">Apellido</ion-label>
+    <ion-input #apellidoInput formControlName="apellido"></ion-input>
+  </ion-item>
+
+  <!-- Educación -->
+  <ion-item lines="inset">
+    <ion-label>Nivel de educación</ion-label>
+    <ion-select formControlName="educacion">
+      <ion-select-option value="bas">Básica</ion-select-option>
+      <ion-select-option value="med">Media</ion-select-option>
+      <ion-select-option value="sup">Superior</ion-select-option>
+    </ion-select>
+  </ion-item>
+
+  <!-- Fecha de nacimiento (Angular Material) -->
+  <div class="mat-wrapper">
+    <mat-form-field appearance="fill" class="full-width">
+      <mat-label>Fecha nacimiento</mat-label>
+      <input matInput [matDatepicker]="picker" formControlName="fnac">
+      <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
+      <mat-datepicker #picker></mat-datepicker>
+    </mat-form-field>
+  </div>
+
+  <!-- Botones -->
+  <ion-grid>
+    <ion-row>
+      <ion-col size="6">
+        <ion-button expand="block" color="medium" (click)="limpiar()">Limpiar</ion-button>
+      </ion-col>
+      <ion-col size="6">
+        <ion-button expand="block" (click)="mostrar()">Mostrar</ion-button>
+      </ion-col>
+    </ion-row>
+  </ion-grid>
+</ion-card>

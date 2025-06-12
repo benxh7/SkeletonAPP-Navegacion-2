@@ -1,0 +1,53 @@
+<ion-card class="certificado-card" [formGroup]="form">
+  <h3>Certificaciones</h3>
+
+  <!-- Nombre del certificado -->
+  <ion-item lines="inset">
+    <ion-label position="floating">Nombre certificado</ion-label>
+    <ion-input formControlName="nombre"></ion-input>
+  </ion-item>
+
+  <!-- Fecha de obtención -->
+  <div class="mat-wrapper">
+    <mat-form-field appearance="fill" class="full-width">
+      <mat-label>Fecha de obtención</mat-label>
+      <input matInput [matDatepicker]="obtFecha" formControlName="fecha">
+      <mat-datepicker-toggle matSuffix [for]="obtFecha"></mat-datepicker-toggle>
+      <mat-datepicker #obtFecha></mat-datepicker>
+    </mat-form-field>
+  </div>
+
+  <!-- Checkbox “¿Vence?” -->
+  <ion-item lines="inset">
+    <ion-label>¿El certificado vence?</ion-label>
+    <ion-checkbox slot="end" formControlName="vence"></ion-checkbox>
+  </ion-item>
+
+  <!-- Fecha de vencimiento (solo si vence) -->
+  <div class="mat-wrapper">
+    <mat-form-field appearance="fill" class="full-width" *ngIf="form.value.vence">
+      <mat-label>Fecha de vencimiento</mat-label>
+      <input matInput [matDatepicker]="venFecha" formControlName="vencimiento">
+      <mat-datepicker-toggle matSuffix [for]="venFecha"></mat-datepicker-toggle>
+      <mat-datepicker #venFecha></mat-datepicker>
+    </mat-form-field>
+  </div>
+
+  <!-- Botones -->
+  <ion-grid>
+    <ion-row>
+      <ion-col size="6">
+        <ion-button expand="block" color="medium"
+          (click)="form.reset({ vence: false })">
+          Limpiar
+        </ion-button>
+      </ion-col>
+      <ion-col size="6">
+        <ion-button expand="block"
+          (click)="guardar()" [disabled]="form.invalid">
+          Guardar
+        </ion-button>
+      </ion-col>
+    </ion-row>
+  </ion-grid>
+</ion-card>

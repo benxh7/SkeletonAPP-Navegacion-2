@@ -1,0 +1,49 @@
+<ion-card class="experiencia-card" [formGroup]="form">
+  <h3>Experiencia laboral</h3>
+
+  <!-- Empresa -->
+  <ion-item lines="inset">
+    <ion-label position="floating">Empresa</ion-label>
+    <ion-input formControlName="empresa"></ion-input>
+  </ion-item>
+
+  <!-- Año de inicio -->
+  <ion-item lines="inset">
+    <ion-label position="floating">Año inicio</ion-label>
+    <ion-input type="number" min="1950" max="2100" formControlName="inicio"></ion-input>
+  </ion-item>
+
+  <!-- Checkbox “Actualmente trabajo aquí” -->
+  <ion-item lines="inset">
+    <ion-label>Actualmente trabajo aquí</ion-label>
+    <ion-checkbox slot="end" formControlName="actual"></ion-checkbox>
+  </ion-item>
+
+  <!-- Año de término (solo si ya no trabaja) -->
+  <ion-item lines="inset" *ngIf="!form.value.actual">
+    <ion-label position="floating">Año término</ion-label>
+    <ion-input type="number" min="1950" max="2100" formControlName="termino"></ion-input>
+  </ion-item>
+
+  <!-- Cargo -->
+  <ion-item lines="inset">
+    <ion-label position="floating">Cargo</ion-label>
+    <ion-input formControlName="cargo"></ion-input>
+  </ion-item>
+
+  <!-- Botones -->
+  <ion-grid>
+    <ion-row>
+      <ion-col size="6">
+        <ion-button expand="block" color="medium" (click)="form.reset({ actual: true })">
+          Limpiar
+        </ion-button>
+      </ion-col>
+      <ion-col size="6">
+        <ion-button expand="block" (click)="guardar()" [disabled]="form.invalid">
+          Guardar
+        </ion-button>
+      </ion-col>
+    </ion-row>
+  </ion-grid>
+</ion-card>

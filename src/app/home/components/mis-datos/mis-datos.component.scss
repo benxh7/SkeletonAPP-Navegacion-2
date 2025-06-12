@@ -1,0 +1,63 @@
+/* ---------- CARTA DE DATOS QUE INGRESA EL USUARIO ---------- */
+
+.datos-card {
+    width: 100%;
+    max-width: 340px;
+    border: 2px solid var(--text-sub);
+    border-radius: 16px;
+    background-color: var(--card-bg);
+    box-shadow: 0 4px 12px var(--shadow-color);
+
+    h3 {
+        font-size: 1.5rem;
+        text-align: center;
+        color: var(--text-main);
+    }
+
+    ion-label {
+        color: var(--text-main);
+        margin-bottom: 8px;
+    }
+}
+
+.mat-wrapper {
+    padding-inline: 16px;
+}
+
+
+/* ---------- ANIMACION DEL BOTON LIMPIAR ---------- */
+@keyframes slide-right {
+    0% {
+        transform: translateX(0);
+    }
+
+    50% {
+        transform: translateX(100px);
+    }
+
+    100% {
+        transform: translateX(0);
+    }
+}
+
+.slide-animation {
+    animation: slide-right 1s ease-in-out;
+}
+
+/* ---------- MENU DE SELECCION DE FECHAS ---------- */
+
+::ng-deep .cdk-overlay-pane .mat-datepicker-content .mat-calendar {
+    background-color: #242424 !important;
+    border-radius: 8px !important;
+}
+
+::ng-deep .cdk-overlay-pane .mat-calendar-body-cell {
+    background-color: #242424 !important;
+}
+
+/* ---------- FOOTER DE LA APLICACION ---------- */
+
+.footer {
+    text-align: center;
+    color: var(--text-sub);
+}

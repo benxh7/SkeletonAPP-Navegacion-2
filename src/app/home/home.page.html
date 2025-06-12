@@ -1,20 +1,31 @@
-<ion-header [translucent]="true">
-  <ion-toolbar>
-    <ion-title>
-      Blank
-    </ion-title>
+<!-- Header de la Aplicación -->
+<ion-header>
+  <ion-toolbar color="primary">
+    <ion-buttons slot="start">
+      <!-- Boton menu hamburguesa -->
+      <ion-menu-button></ion-menu-button>
+    </ion-buttons>
+    <ion-title class="header">SkeletonAPP</ion-title>
   </ion-toolbar>
 </ion-header>
 
-<ion-content [fullscreen]="true">
-  <ion-header collapse="condense">
-    <ion-toolbar>
-      <ion-title size="large">Blank</ion-title>
-    </ion-toolbar>
-  </ion-header>
-
-  <div id="container">
-    <strong>Ready to create an app?</strong>
-    <p>Start with Ionic <a target="_blank" rel="noopener noreferrer" href="https://ionicframework.com/docs/components">UI Components</a></p>
+<!-- Contenido de la aplicacion -->
+<ion-content class="home-content" fullscreen>
+  <div class="home-header">
+    <h1>¡Bienvenido/a {{ username }}!</h1>
   </div>
+
+  <!-- Segment -->
+  <ion-segment [(ngModel)]="tab">
+    <ion-segment-button value="datos">Mis Datos</ion-segment-button>
+    <ion-segment-button value="experiencia">Experiencia</ion-segment-button>
+    <ion-segment-button value="certificaciones">Certificado</ion-segment-button>
+  </ion-segment>
+
+  <!-- Contenedor -->
+  <ng-container [ngSwitch]="tab">
+    <app-mis-datos *ngSwitchCase="'datos'"></app-mis-datos>
+    <app-experiencia-laboral *ngSwitchCase="'experiencia'"></app-experiencia-laboral>
+    <app-certificaciones *ngSwitchCase="'certificaciones'"></app-certificaciones>
+  </ng-container>
 </ion-content>

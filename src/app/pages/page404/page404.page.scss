@@ -1,0 +1,61 @@
+ion-padding {
+    padding-bottom: 100px !important;
+}
+
+.page404-content {
+    --background: var(--app-bg);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+
+    /* Animacion */
+    animation: fade-in 0.6s ease-out;
+}
+
+.illustration {
+    ion-icon {
+        font-size: 6rem;
+        color: var(--text-sub);
+        animation: float 4s ease-in-out infinite;
+    }
+}
+
+h1 {
+    font-size: 5rem;
+    font-weight: 700;
+    margin: 0.5rem 0 0;
+    color: var(--text-sub);
+}
+
+p {
+    font-size: 1.1rem;
+    margin: 0 0 2rem;
+    opacity: 0.8;
+}
+
+/* keyframes */
+@keyframes fade-in {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes float {
+
+    0%,
+    100% {
+        transform: translateY(0);
+    }
+
+    50% {
+        transform: translateY(-10px);
+    }
+}

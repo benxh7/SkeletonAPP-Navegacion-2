@@ -1,0 +1,106 @@
+/* ---------- HEADER DE LA APLICACION ---------- */
+
+.header {
+    text-align: center;
+}
+
+/* ---------- CONTENIDO DE LA APLICACION ---------- */
+
+.login-content {
+    --background: var(--app-bg);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 0 16px;
+}
+  
+/* ---------- CUERPO DE LA APLICACION ---------- */
+
+.login-header {
+    text-align: center;
+    margin-bottom: 50px;
+  
+    h1 {
+        margin-top: 50px;
+        font-size: 2rem;
+        font-weight: bold;
+        color: var(--text-main);
+    }
+  
+    h2 {
+        font-size: 1.0rem;
+        font-weight: bold;
+        color: var(--text-sub);
+    }
+}
+  
+/* ---------- CARTA DE DATOS QUE INGRESA EL USUARIO ---------- */
+
+.login-card {
+    width: 100%;
+    max-width: 340px;
+    border-radius: 12px;
+    background-color: var(--card-bg);
+    box-shadow: 0 4px 12px var(--shadow-color);
+
+    h3 {
+        font-size: 1.5rem;
+        text-align: center;
+        color: var(--text-main);
+    }
+
+  
+    form {
+      padding: 24px 16px;
+
+      .text-label {
+        color: var(--text-main);
+        margin-bottom: 8px;
+      }
+    }
+}
+  
+/* Inputs con linea completa y espacio entre ellos */
+ion-item {
+    --background: transparent;
+    margin-bottom: 20px;
+    --color: var(--text-main);
+    --placeholder-color: var(--text-sub);
+}
+
+ion-input {
+    color: var(--text-main);
+}
+  
+ion-label {
+    color: var(--text-sub);
+}
+  
+/* Boton de ingresar */
+ion-button {
+    --background: var(--accent);
+    --color: var(--card-bg);
+    --border-radius: 24px;
+    font-weight: 600;
+    margin-top: 8px;
+}
+  
+/* Futuro link para registrarse */
+.register-link {
+    margin-top: 16px;
+    text-align: center;
+  
+    a {
+      font-size: 0.9rem;
+      color: var(--accent);
+      text-decoration: none;
+    }
+}
+
+/* ---------- FOOTER DE LA APLICACION ---------- */
+
+.footer {
+    text-align: center;
+    color: var(--text-sub);
+}

@@ -1,15 +1,29 @@
 import { NgModule } from '@angular/core';
 import { PreloadAllModules, RouterModule, Routes } from '@angular/router';
+import { AuthGuard } from './guards/auth.guard';
 
 const routes: Routes = [
-  {
-    path: 'home',
-    loadChildren: () => import('./home/home.module').then( m => m.HomePageModule)
-  },
+  // Redireccionamiento inicial a la pagina de Login
   {
     path: '',
-    redirectTo: 'home',
+    redirectTo: 'login',
     pathMatch: 'full'
+  },
+  // Pagina de Login
+  {
+    path: 'login',
+    loadChildren: () => import('./pages/login/login.module').then( m => m.LoginPageModule)
+  },
+  // Home Page protegida con AuthGuard
+  {
+    path: 'home',
+    canActivate: [AuthGuard],
+    loadChildren: () => import('./home/home.module').then( m => m.HomePageModule)
+  },
+  // Pagina Error 404
+  {
+    path: '**',
+    loadChildren: () => import('./pages/page404/page404.module').then( m => m.Page404PageModule)
   },
 ];
 

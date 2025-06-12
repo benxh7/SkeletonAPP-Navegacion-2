@@ -1,0 +1,53 @@
+<!-- Header de la Aplicación -->
+<ion-header [translucent]="true">
+  <ion-toolbar color="primary">
+    <ion-title class="header">Inicio de Sesión</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<!-- Contenido de la aplicacion -->
+<ion-content class="login-content">
+  <!-- Cabeza de la pagina Login -->
+  <div class="login-header">
+    <h1>SkeletonAPP</h1>
+    <h2>Aquí comienza todo</h2>
+  </div>
+
+  <!-- Tarjeta de inico de sesión del usuario -->
+  <ion-card class="login-card">
+    <h3>¡Bienvenido!</h3>
+
+    <!-- Formulario para el ingreso de datos en Login -->
+    <form [formGroup]="loginForm" (ngSubmit)="onSubmit()">
+
+      <!-- Nombre de Usuario -->
+      <ion-item lines="full">
+        <ion-label class="text-label" position="floating">Usuario</ion-label>
+        <ion-input formControlName="user" maxlength="8"></ion-input>
+      </ion-item>
+      
+      <!-- Contraseña -->
+      <ion-item lines="full">
+        <ion-label class="text-label" position="floating">Contraseña (4 dígitos)</ion-label>
+        <ion-input type="password" formControlName="pin" maxlength="4" inputmode="numeric"></ion-input>
+      </ion-item>
+
+      <!-- Boton de Ingresar -->
+      <ion-button type="submit" expand="block" fill="outline" [disabled]="loginForm.invalid">
+        Ingresar
+      </ion-button>
+    </form>
+  </ion-card>
+
+  <!-- Link de registro debajo del card -->
+  <div class="register-link">
+    <a routerLink="/register">Crea tu cuenta gratis</a>
+  </div>
+</ion-content>
+
+<!-- Footer de la Aplicación -->
+<ion-footer class="footer" slot="fixed">
+  <ion-toolbar color="primary">
+    <ion-title>© 2025 SkeletonAPP</ion-title>
+  </ion-toolbar>
+</ion-footer>
