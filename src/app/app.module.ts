@@ -20,7 +20,7 @@ import { IonicStorageModule } from '@ionic/storage-angular';
     },
     {
       provide: APP_INITIALIZER,
-      useFactory: (db: DbTaskService) => () => db.init(),
+      useFactory: (db: DbTaskService) => () => db. inicioDB(),
       deps: [DbTaskService],
       multi: true,
     },

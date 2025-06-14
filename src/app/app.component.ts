@@ -19,7 +19,7 @@ export class AppComponent {
   /** Cierra sesión: marca active = 0 y navega a /login */
   async logout() {
     /* 1. aseguramos init */
-    await this.db.init();
+    await this.db. inicioDB();
 
     /* 2. extraemos el usuario almacenado en Storage */
     const ses = await this.db['storage'].get('session');

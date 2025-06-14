@@ -28,10 +28,10 @@ export class LoginPage implements OnInit {
     const { user, pin } = this.loginForm.getRawValue();
 
     /* 1. nos aseguramos de que Storage/SQLite estén listos */
-    await this.db.init();
+    await this.db. inicioDB();
 
     /* 2. ¿El usuario ya existe en la BD? */
-    const existe = await this.db.validarUser(user, pin);
+    const existe = await this.db.validarUsuario(user, pin);
 
     if (existe) {
       // 🟢 Usuario conocido ⇒ lo marcamos activo

@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { CapacitorSQLite, SQLiteDBConnection, SQLiteConnection } from '@capacitor-community/sqlite';
 import { Storage } from '@ionic/storage-angular';
 import { Capacitor } from '@capacitor/core';
+import { Certificado } from '../models/certificado.model';
 
 
 @Injectable({
@@ -13,44 +14,36 @@ export class DbTaskService {
 
   constructor(private storage: Storage) { }
 
-  async init() {
-    if (this.connection) {
-      // Si ya tenemos una conexión abierta, no hacemos nada
-      // Esto es útil para evitar reabrir la conexión en cada uso
-      // y para evitar errores si intentamos abrirla de nuevo.
-      const opened = (typeof this.connection.isDBOpen === 'function')
-                       ? this.connection.isDBOpen()
-                       : this.connection.isDBOpen;
-  
-      if (!opened) {
-        await this.connection.open();
-      }
-      return;
-    }
+  /**
+   * Inicializamos la conexion a la base de datos de SQLite
+   * y creamos las tablas necesarias de la aplicacion.
+   * Si estamos en una plataforma web usaremos Ionic Storage.
+   */
+  async inicioDB() {
+    if (this.connection) return;
 
     const sqlite = new SQLiteConnection(CapacitorSQLite);
 
     if (Capacitor.isNativePlatform()) {
       this.connection = await sqlite.createConnection(
-        'skeleton.db', false, 'no-encryption', 2, false
+        'skeleton.db', false, 'no-encryption', 1, false
       );
       await this.connection.open();
-      await this.createTables();
-    } else if (customElements.get('jeep-sqlite')) {
-      this.connection = await sqlite.createConnection(
-        'skeleton', false, 'no-encryption', 1, false
-      );
-      await this.connection.open();
-
-      await this.createTables();
+      await this.crearTablas();
     }
-
-    // En web, usamos Ionic Storage para persistencia
+    
+    /**
+     * En pagina web o ionic server usamos Ionic Storage
+     * para guardar los datos de sesión y otros datos simples.
+     */
     await this.storage.create();
   }
 
-
-  private async createTables() {
+  /**
+   * Creamos las tablas necesarias para la aplicacion.
+   * Como dato importante "sesion_data" almacenara los datos de sesion del usuario.
+   */
+  private async crearTablas() {
     await this.connection.execute(`
       CREATE TABLE IF NOT EXISTS sesion_data (
         user_name TEXT(8) PRIMARY KEY NOT NULL,
@@ -115,7 +108,7 @@ export class DbTaskService {
    * @param pass Contraseña del usuario
    * @returns true si las credenciales son válidas, false en caso contrario
    */
-  async validarUser(user: string, pass: string) {
+  async validarUsuario(user: string, pass: string) {
     if (this.connection) {
       const r = await this.connection.query(
         `SELECT 1 FROM sesion_data WHERE user_name=? AND password=?`,
@@ -153,11 +146,23 @@ export class DbTaskService {
     }
   }
 
+  /**
+   * Recupera el nombre de usuario actual.
+   * Esto se hace consultando la clave `session` en Storage
+   * o la tabla de "sesion_data" si estamos en nativo.
+   * @returns Nombre de usuario o null si no hay sesión activa
+   */
   async usuarioActual(): Promise<string | null> {
     const ses = await this.storage.get('session');
     return ses?.user ?? null;
   }
 
+  /**
+   * Guarda los datos personales del usuario.
+   * Esto se hace insertando o actualizando en la tabla "datos_personales"
+   * y también guardando en Storage para compatibilidad web.
+   * @param datos Objeto con los datos personales
+   */
   async guardarMisDatos(datos: {
     nombre: string;
     apellido: string;
@@ -176,6 +181,11 @@ export class DbTaskService {
     await this.storage.set(`datos_personales_${user}`, datos);
   }
 
+  /**
+   * Recuperamos todos los datos personales del usuario.
+   * Esto se hace consultando la tabla "datos_personales" o Storage.
+   * @returns Objeto con los datos personales o null si no hay datos
+   */
   async obtenerMisDatos() {
     const user = await this.usuarioActual();
     if (!user) return null;
@@ -227,6 +237,12 @@ export class DbTaskService {
     await this.storage.set(`exp_${user}`, lst);
   }
 
+  /**
+   * Elimina un registro de experiencia laboral.
+   * Esto se hace eliminando el registro de la tabla `experiencia`
+   * y actualizando la lista en Storage.
+   * @param id ID del registro a eliminar
+   */
   async eliminarExperiencia(id: number) {
     if (this.connection) {
       await this.connection.run(`DELETE FROM experiencia WHERE id = ?`, [id]);
@@ -240,8 +256,8 @@ export class DbTaskService {
 
   /**
    * Actualiza un registro de experiencia.
-   * @param id     ID de la fila (PRIMARY KEY autoincremental)
-   * @param exp    Campos a modificar. Solo los que envíes serán cambiados
+   * @param id ID de la fila (PRIMARY KEY autoincremental)
+   * @param exp Campos a modificar. Solo los que envíes serán cambiados
    */
   async actualizarExperiencia(
     id: number,
@@ -253,9 +269,7 @@ export class DbTaskService {
       cargo: string;
     }>
   ) {
-    /* 1️⃣  -- Plataforma nativa / jeep-sqlite (SQLite disponible) -- */
     if (this.connection) {
-      // Construimos SET dinámico según las claves recibidas
       const cols = Object.keys(exp);
       const values = Object.values(exp);
 
@@ -267,8 +281,7 @@ export class DbTaskService {
         );
       }
     }
-
-    /* 2️⃣  -- ionic serve  (fallback Storage) -- */
+    // Actualizamos en Storage
     const lista = (await this.storage.get('experiencia')) ?? [];
     const idx = lista.findIndex((e: any) => e.id === id);
     if (idx !== -1) {
@@ -296,16 +309,21 @@ export class DbTaskService {
   }
 
   /* CURD de los certificados */
-  async agregarCertificado(cert: any) {
+  async agregarCertificado(cert: Certificado) {
+    const user = await this.usuarioActual();
+    if (!user) return;
+  
     if (this.connection) {
       await this.connection.run(
-        `INSERT INTO certificados(nombre,fecha,vence,vencimiento) VALUES(?,?,?,?)`,
-        [cert.nombre, cert.fecha, +cert.vence, cert.vencimiento]
+        `INSERT INTO certificados
+         (user_name,nombre,fecha,vence,vencimiento)
+         VALUES (?,?,?,?,?)`,
+        [user, cert.nombre, cert.fecha, +cert.vence, cert.vencimiento]
       );
     }
-    const arr = (await this.storage.get('certificados')) ?? [];
+    const arr = (await this.storage.get(`cert_${user}`)) ?? [];
     arr.unshift(cert);
-    await this.storage.set('certificados', arr);
+    await this.storage.set(`cert_${user}`, arr);
   }
 
   /**
@@ -315,11 +333,16 @@ export class DbTaskService {
    * @returns 
    */
   async listaCertificado() {
+    const user = await this.usuarioActual();
+    if (!user) return [];
+  
     if (this.connection) {
-      const r = await this.connection.query(`SELECT * FROM certificados ORDER BY id DESC`);
+      const r = await this.connection.query(
+        `SELECT * FROM certificados
+         WHERE user_name = ?
+         ORDER BY id DESC`, [user]);
       return r.values ?? [];
     }
-    return (await this.storage.get('certificados')) ?? [];
+    return (await this.storage.get(`cert_${user}`)) ?? [];
   }
-
 }

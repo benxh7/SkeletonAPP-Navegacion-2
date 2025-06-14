@@ -10,7 +10,7 @@ export const AuthGuard: CanActivateFn = async (route, state) => {
 
   // Aqui nos aseguramos de que la base de datos esté inicializada
   // y que las tablas necesarias estén creadas.
-  await db.init();
+  await db. inicioDB();
 
   // Verificamos si hay una sesion activa
   // Esto devuelve true si hay una sesión activa y false si no.

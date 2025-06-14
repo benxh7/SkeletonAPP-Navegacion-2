@@ -30,6 +30,13 @@ export class CertificacionesComponent implements OnInit {
     this.lista = await this.db.listaCertificado();
   }
 
+  /**
+   * Este metodo guarda un nuevo certificado.
+   * Comprueba que el formulario sea válido antes de guardar.
+   * Si el formulario es válido, llama al servicio para agregar el certificado
+   * y luego reinicia el formulario.
+   * @returns 
+   */
   async guardar() {
     if (this.form.invalid) return;
     await this.db.agregarCertificado(this.form.getRawValue());

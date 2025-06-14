@@ -50,17 +50,21 @@ export class MisDatosComponent implements OnInit {
   }
 
   // Metodo que ejecuta la accion del boton de mostrar
-  async mostrar() {
-    // Si datos vacios, mostraremos un toast de error
+  async guardar() {
+
+    /**
+     * Validamos el formulario antes de guardar.
+     * Si el formulario es inválido, mostramos un toast con los campos faltantes.
+     */
     if (this.form.invalid) {
       const missing: string[] = [];
       const ctrl = this.form.controls;
-
+  
       if (ctrl.nombre.invalid) missing.push('Nombres');
       if (ctrl.apellido.invalid) missing.push('Apellidos');
       if (ctrl.educacion.invalid) missing.push('Nivel de educación');
       if (ctrl.fnac.invalid) missing.push('Fecha de nacimiento');
-
+  
       const toast = await this.toastCtrl.create({
         message: `Por favor completa: ${missing.join(', ')}`,
         color: 'danger',
@@ -70,11 +74,15 @@ export class MisDatosComponent implements OnInit {
       await toast.present();
       return;
     }
-
-    /* 👇 1. guardamos en la BD */
+  
+    /**
+     * Guardamos los datos del formulario en la base de datos.
+     * Utilizamos getRawValue() para obtener todos los valores del formulario,
+     * incluyendo los que están deshabilitados.
+     * Esto es importante para asegurarnos de que todos los campos se guarden correctamente.
+     */
     await this.db.guardarMisDatos(this.form.getRawValue());
-
-    /* 2. toast de confirmación */
+  
     const { nombre, apellido } = this.form.value;
     const toast = await this.toastCtrl.create({
       message: `¡Datos guardados! Hola ${nombre} ${apellido}`,
@@ -82,6 +90,9 @@ export class MisDatosComponent implements OnInit {
       duration: 2500,
       position: 'middle',
     });
-    toast.present();
+    await toast.present();
+
+    // Limpiamos el formulario después de guardar
+    this.limpiar();
   }
 }
